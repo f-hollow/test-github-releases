@@ -36,7 +36,7 @@ jobs:
       run: |
         mkdir build-${{ matrix.arch }}
         cd build-${{ matrix.arch }}
-        gcc -o myapp-${{ matrix.arch }} ../main.c
+        gcc -o myapp-${{ matrix.arch }} ../../simple-app/main.c
 
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
