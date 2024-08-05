@@ -18,11 +18,11 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
 
     - name: Set up Docker Buildx
       id: buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Cache Docker layers
       uses: actions/cache@v3
@@ -51,13 +51,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Download Artifacts
+    - name: Download Artifacts amd32
       uses: actions/download-artifact@v3
       with:
         name: myapp-amd32
         path: myapp-amd32
 
-    - name: Download Artifacts
+    - name: Download Artifacts amd64
       uses: actions/download-artifact@v3
       with:
         name: myapp-amd64
