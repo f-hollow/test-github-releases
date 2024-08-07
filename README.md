@@ -1,3 +1,3 @@
 # test-github-releases
 
-Changes in the main branch.
+Changes in the test branch.
