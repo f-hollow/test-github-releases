@@ -20,6 +20,29 @@ jobs:
             --exclude-path ./themes/
             --exclude-path ./layouts/
             --exclude-path ./content/blog/nuttx-getting-started/
+            --output ./lychee_output.txt
             .
           # Fail action on broken links
           fail: true
+
+      - name: Upload Lychee Output
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: lychee-output
+          path: ./lychee_output.txt
+
+      - name: Comment on PR with Link Check Results
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('./lychee_output.txt', 'utf8');
+            const failedLinks = output.match(/.*\[.*\]\(.*\).*/g).join('\n');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Link Checker found the following broken links:\n\n${failedLinks}`
+            });
