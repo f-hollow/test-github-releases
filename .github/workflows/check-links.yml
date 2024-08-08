@@ -3,6 +3,24 @@ name: Check links
 on:
   pull_request:
     branches: [main]
+  # Add an option to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Set permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+# Default to bash
+defaults:
+  run:
+    shell: bash
 
 jobs:
   check-links:
@@ -20,29 +38,42 @@ jobs:
             --exclude-path ./themes/
             --exclude-path ./layouts/
             --exclude-path ./content/blog/nuttx-getting-started/
-            --output ./lychee_output.txt
             .
           # Fail action on broken links
           fail: true
+          #output: ./lychee_output.md
 
-      - name: Upload Lychee Output
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: lychee-output
-          path: ./lychee_output.txt
+      # - name: Check if lychee_output.md exists
+      #   run: |
+      #     if [ -f "./lychee_output.md" ]; then
+      #       echo "lychee_output.md file exists."
+      #     else
+      #       echo "lychee_output.md file does not exist."
+      #       exit 1
+      #     fi
 
-      - name: Comment on PR with Link Check Results
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const output = fs.readFileSync('./lychee_output.txt', 'utf8');
-            const failedLinks = output.match(/.*\[.*\]\(.*\).*/g).join('\n');
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Link Checker found the following broken links:\n\n${failedLinks}`
-            });
+      # - name: Print lychee_output.md contents
+      #   run: cat ./lychee_output.md
+      #   if: success() && steps.lychee.outputs.fail
+
+      # - name: Upload Lychee Output
+      #   if: failure()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: lychee-output
+      #     path: ./lychee_output.md
+
+      # - name: Comment on PR with Link Check Results
+      #   if: failure()
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const fs = require('fs');
+      #       const output = fs.readFileSync('./lychee_output.txt', 'utf8');
+      #       const failedLinks = output.match(/.*\[.*\]\(.*\).*/g).join('\n');
+      #       github.rest.issues.createComment({
+      #         issue_number: context.issue.number,
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: `Link Checker found the following broken links:\n\n${failedLinks}`
+      #       });
