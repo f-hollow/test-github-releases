@@ -41,7 +41,12 @@ jobs:
             .
           # Fail action on broken links
           fail: true
-          #output: ./lychee_output.md
+
+      - name: Notify
+        run: |
+          echo "Please review the reported links.
+          echo "If a link is valid but fails due to a CAPTCHA challenge, IP blocking, login requirements, etc.,\n\
+          consider adding such links to .lycheeignore file to bypass future checks."
 
       # - name: Check if lychee_output.md exists
       #   run: |
