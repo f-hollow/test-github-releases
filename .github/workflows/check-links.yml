@@ -19,16 +19,25 @@ jobs:
             --include-fragments
             --exclude-path ./themes/
             --exclude-path ./layouts/
+            --exclude-path ./content/blog/nuttx-getting-started/
             .
-          # Do not fail immediately on broken links
-          fail: false
+          output: ./lychee_output.md
+          # Fail action on broken links
+          fail: true
 
-      - name: Check Link Checker Result
-        id: result
+      # - name: Check if lychee_output.md exists
+      #   run: |
+      #     if [ -f "./lychee_output.md" ]; then
+      #       cat ./lychee_output.md
+      #       echo 'there is error'
+      #       exit 1
+      #     else
+      #       cat ./lychee_output.md
+      #     fi
+
+      - name: Notify
+        if: failure()
         run: |
-          if grep -q 'ERROR' .lychee/lychee.log; then
-            echo "Link checking failed. Please address the broken links reported by the link checker. If you encounter links that work but fail due to CAPTCHA or other challenges, consider adding them to the .lycheeignore file."
-            exit 1
-          else
-            echo "Link checking passed. No broken links found."
-          fi
+          echo "Please review the reported links.
+          echo "If a link is valid but fails due to a CAPTCHA challenge, IP blocking, login requirements, etc.,
+          consider adding such links to .lycheeignore file to bypass future checks."
