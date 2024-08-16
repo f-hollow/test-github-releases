@@ -35,9 +35,10 @@ jobs:
       #       cat ./lychee_output.md
       #     fi
 
-      - name: Notify
+      - name: Suggestions
         if: failure()
         run: |
-          echo "Please review the reported links.
-          echo "If a link is valid but fails due to a CAPTCHA challenge, IP blocking, login requirements, etc.,
-          consider adding such links to .lycheeignore file to bypass future checks."
+          echo -e "\nPlease review the links reported in Link Checker step above."
+          echo -e "If a link is valid but fails due to a CAPTCHA challenge, IP blocking, login requirements, etc.,
+          consider adding such links to .lycheeignore file to bypass future checks.\n"
+          exit 1
