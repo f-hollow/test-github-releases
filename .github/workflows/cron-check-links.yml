@@ -1,0 +1,25 @@
+name: Cron Link Checker
+
+# Schedule to run the link checker every 5 minutes
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allow manual runs
+
+jobs:
+  cron-check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Link Checker
+        id: lychee
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: |
+            --no-progress
+            --include-fragments
+            --exclude-path ./themes/
+            --exclude-path ./layouts/
+            .
+          fail: true
