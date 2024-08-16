@@ -21,19 +21,8 @@ jobs:
             --exclude-path ./layouts/
             --exclude-path ./content/blog/nuttx-getting-started/
             .
-          output: ./lychee_output.md
           # Fail action on broken links
           fail: true
-
-      # - name: Check if lychee_output.md exists
-      #   run: |
-      #     if [ -f "./lychee_output.md" ]; then
-      #       cat ./lychee_output.md
-      #       echo 'there is error'
-      #       exit 1
-      #     else
-      #       cat ./lychee_output.md
-      #     fi
 
       - name: Suggestions
         if: failure()
