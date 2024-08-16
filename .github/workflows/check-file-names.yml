@@ -1,11 +1,11 @@
-name: Check File Names
+name: Check filenames for spaces
 
 on:
   pull_request:
     branches: [main]
 
 jobs:
-  check-file-names:
+  check-filenames-spaces:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,20 +15,18 @@ jobs:
       - name: Fetch main branch
         run: git fetch origin main
 
-      - name: List Added Files
+      - name: Check filenames for spaces
         id: list-files
         run: |
           # Get the list of added files from the pull request
-          git diff --name-only --diff-filter=A origin/main...HEAD > added-files.txt
+          FILENAMES_SPACES=$(git diff --name-only origin/main...HEAD | ( grep "\s" || true ) )
 
-      - name: Check for Spaces in File Names
-        id: check-spaces
-        run: |
-          # Check for spaces in file names
-          if grep -q ' ' added-files.txt; then
-            echo "Error: Some added files have spaces in their names. Replace the spaces, for example, with a dash."
-            grep ' ' added-files.txt
+          if [ -n "$FILENAMES_SPACES" ]; then
+            echo "Rejecting merge. PR has the following files with spaces in their names:"
+            echo "$FILENAMES_SPACES"
+            echo "Please replace the spaces, for example, with a dash."
             exit 1
+
           else
-            echo "All added files have valid names."
+            echo "All added files have no spaces."
           fi
