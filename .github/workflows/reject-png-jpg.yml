@@ -13,9 +13,6 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history to ensure we can access all branches
 
-      - name: Fetch main branch
-        run: git fetch origin main
-
       - name: Check for JPEG and PNG files
         run: |
           # Check for .jpeg, .jpg, .JPG, .JPEG, .png, .PNG files
