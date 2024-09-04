@@ -15,29 +15,29 @@ jobs:
       - name: Check out main branch
         run: git checkout main
 
-#       - name: Dump all links from main
-#         id: dump_links_from_main
-#         uses: lycheeverse/lychee-action@v1
-#         with:
-#           args: |
-#             --dump
-#             --include-fragments
-#             --exclude-path ./themes/
-#             --exclude-path ./layouts/
-#             .
-#             > links-main.txt
-
       - name: Dump all links from main
-        run: |
-          docker run --rm -v $PWD:/workspace lycheeverse/lychee:latest \
-            --dump \
-            --include-fragments \
-            --exclude-path ./themes/ \
-            --exclude-path ./layouts/ \
-            . > links-main.txt
+        id: dump_links_from_main
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: |
+            --dump
+            --include-fragments
+            --exclude-path ./themes/
+            --exclude-path ./layouts/
+            .
+          output: ./links-main.txt
 
-      # - name: Print links-main.txt in main
-      #   run: cat links-main.txt
+      # - name: Dump all links from main
+      #   run: |
+      #     docker run --rm -v $PWD:/workspace lycheeverse/lychee:latest \
+      #       --dump \
+      #       --include-fragments \
+      #       --exclude-path ./themes/ \
+      #       --exclude-path ./layouts/ \
+      #       . > links-main.txt
+
+      - name: Print links-main.txt in main
+        run: cat links-main.txt
 
       # - name: Print .lycheeignore in main
       #   run: cat .lycheeignore
