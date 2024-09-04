@@ -12,8 +12,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          # ref: ${{github.event.pull_request.head.ref}}
+          # repository: ${{github.event.pull_request.head.repo.full_name}}
 
       - name: Check out main branch
         run: git checkout main
@@ -46,18 +46,21 @@ jobs:
       #   run: cat .lycheeignore
       #   continue-on-error: true
 
-      - name: Stash untracked files
-        run: git stash push --include-untracked
+      # - name: Stash untracked files
+      #   run: git stash push --include-untracked
 
       - name: Check out feature branch
-        run: git checkout ${{ github.head_ref }}
+        run: git checkout -f ${{ github.head_ref }}
 
-      - name: Apply stashed changes
-        # Apply stashed changes, ignore errors if stash is empty
-        run: git stash pop || true
+      - name: Print links-main.txt in main
+        run: cat links-main.txt
 
-      - name: Append links-main.txt to .lycheeignore
-        run: cat links-main.txt >> .lycheeignore
+      # - name: Apply stashed changes
+      #   # Apply stashed changes, ignore errors if stash is empty
+      #   run: git stash pop || true
+
+      # - name: Append links-main.txt to .lycheeignore
+      #   run: cat links-main.txt >> .lycheeignore
 
       # - name: Print .lycheeignore in feature
       #   run: cat .lycheeignore
