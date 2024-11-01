@@ -46,6 +46,29 @@ jobs:
       - name: Print .lycheeignore
         run: cat .lycheeignore
 
+      - name: Print $base_commit
+        run: echo $base_commit
+
+      - name: Print ${{ github.event.pull_request.head.sha }}
+        run: echo ${{ github.event.pull_request.head.sha }}
+
+      - name: Dump all files removed in PR and add prefix to each file
+        run: |
+          git diff --name-only --diff-filter D $(git merge-base origin/main baseline-copy) ${{ github.event.pull_request.head.sha }} > removed-files.txt
+          sed -i 's|$|#|' removed-files.txt
+
+      - name: Print removed-files.txt
+        run: cat removed-files.txt
+
+      - name: Remove matching lines from .lycheeignore
+        run: |
+          while IFS= read -r line; do
+            sed -i "\|$line|d" .lycheeignore
+          done < removed-files.txt
+
+      - name: Print .lycheeignore
+        run: cat .lycheeignore
+
       - name: Check links
         uses: lycheeverse/lychee-action@v2.0.2
         with:
