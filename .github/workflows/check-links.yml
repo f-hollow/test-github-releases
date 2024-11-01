@@ -1,80 +1,72 @@
-name: Check links
+name: Check links in diffs
 
 on:
   pull_request:
     branches: [main]
-  # Add an option to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# Set permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
-
-# Default to bash
-defaults:
-  run:
-    shell: bash
 
 jobs:
   check-links:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
 
-      - name: Link Checker
-        id: lychee
-        uses: lycheeverse/lychee-action@v1
+      - name: Create baseline branch by reverting feature branch changes
+        run: |
+          # Create a copy of the feature branch
+          git checkout -b baseline-copy
+
+          # Find the base commit where the feature branch diverged from main
+          base_commit=$(git merge-base origin/main baseline-copy)
+
+          # Reset the new branch to the base commit
+          git reset --hard $base_commit
+
+      - name: Dump all links from baseline-copy
+        uses: lycheeverse/lychee-action@v2.0.2
+        with:
+          args: |
+            --dump
+            --include-fragments
+            --exclude-path ./themes/
+            --exclude-path ./layouts/
+            .
+          output: links-baseline.txt
+
+      - name: Check out feature branch
+        run: git checkout ${{ github.head_ref }}
+
+      - name: Append links-baseline.txt to .lycheeignore
+        run: cat links-baseline.txt >> .lycheeignore
+
+      - name: Print .lycheeignore
+        run: cat .lycheeignore
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@v2.0.2
         with:
           args: |
             --no-progress
             --include-fragments
             --exclude-path ./themes/
             --exclude-path ./layouts/
-            --exclude-path ./content/blog/nuttx-getting-started/
             .
-          output: ./lychee_output.md
-          # Fail action on broken links
-          fail: false
+          fail: true  # Fail action if broken links are found
 
-      - name: Check if lychee_output.md exists
+      - name: Suggestions
+        if: failure()
         run: |
-          if [ -f "./lychee_output.md" ]; then
-            echo 'there is error'
-            cat ./lychee_output.md
-            exit 1
-          else
-            echo "errors not found"
-          fi
+          echo -e "\nPlease review the links reported in the Check links step above."
+          echo -e "If a link is valid but fails due to a CAPTCHA challenge, IP blocking, login requirements, etc.,"
+          echo -e "consider adding such links to the .lycheeignore file to bypass future checks.\n"
+          exit 1
 
-      # - name: Print lychee_output.md contents
-      #   run: cat ./lychee_output.md
-      #   if: success() && steps.lychee.outputs.fail
-
-      # - name: Upload Lychee Output
-      #   if: failure()
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: lychee-output
-      #     path: ./lychee_output.md
-
-      # - name: Comment on PR with Link Check Results
-      #   if: failure()
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       const fs = require('fs');
-      #       const output = fs.readFileSync('./lychee_output.txt', 'utf8');
-      #       const failedLinks = output.match(/.*\[.*\]\(.*\).*/g).join('\n');
-      #       github.rest.issues.createComment({
-      #         issue_number: context.issue.number,
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         body: `Link Checker found the following broken links:\n\n${failedLinks}`
-      #       });
+      - name: Clean up all changes
+        if: always()
+        run: |
+          git reset --hard HEAD
+          git clean -df
