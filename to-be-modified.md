@@ -6,6 +6,6 @@ There is some text.
 
 Let's test how it works.
 
-## Heading to be modified
+## Heading to be modified new
 
 Let's test how it works.
